@@ -1,0 +1,105 @@
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
+import java.net.InetSocketAddress;
+import java.net.URI;
+import java.sql.SQLException;
+
+import com.sun.net.httpserver.*;
+import com.sun.net.httpserver.spi.HttpServerProvider;
+
+import jdk.nashorn.internal.ir.RuntimeNode.Request;
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
+
+public class httpServer_Server implements {
+	private HttpServer httpserver;
+
+	public httpServer_Server(){
+		HttpServerProvider provider = HttpServerProvider.provider();
+		try {
+			httpserver = provider.createHttpServer(new InetSocketAddress(19017), 100);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
+
+// Listen port 19017.Listening to one hundred clients at the same time
+		httpserver.createContext("/", new MyResponseHandler());
+		httpserver.setExecutor(null);
+	}
+
+	public void Stop() {
+		if (httpserver != null) {
+			httpserver.stop(0);
+		}
+	}
+	public void Start() {
+		if (httpserver != null) {
+			httpserver.start();
+		}
+	}
+
+	public class MyResponseHandler implements HttpHandler {
+		@Override
+		public void handle(HttpExchange httpExchange) throws IOException {
+			String requestMethod = httpExchange.getRequestMethod();
+//get http Method
+			if (requestMethod.equalsIgnoreCase("GET")) {
+//if the Method is Get
+				Headers responseHeaders = httpExchange.getResponseHeaders();
+				responseHeaders.set("Content-Type", "text/html;charset=utf-8");
+				URI url = httpExchange.getRequestURI();
+				String response = url.getPath();
+//response is url path like www.test.com/test,response is "/test" should take off the "/"
+//
+//
+//                                             DO SOMETHING HERE!
+//
+//
+				httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.getBytes("UTF-8").length);
+//set http;
+				OutputStream responseBody = httpExchange.getResponseBody();
+//get httpstream
+				OutputStreamWriter writer = new OutputStreamWriter(responseBody, "UTF-8");
+//set stream
+				writer.write(response);
+//push out your data, response is your data;
+				writer.close();
+				responseBody.close();
+			} else if (requestMethod.equalsIgnoreCase("POST")) {
+//if is Method Post
+				Headers responseHeaders = httpExchange.getResponseHeaders();
+				responseHeaders.set("Content-Type", "text/html;charset=utf-8");
+				byte[] b = new byte[1024];
+				httpExchange.getRequestBody().read(b);
+//the client's data is new String(b);
+//
+//
+//                                             DO SOMETHING HERE!
+//
+//
+
+				/*
+                                String response = "200";
+				if(results == false) {
+					response="404";
+				}
+                                */
+//some time HttpOk will be not work so you can push a flag  back;
+				httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.getBytes("UTF-8").length);
+				OutputStream responseBody = httpExchange.getResponseBody();
+				OutputStreamWriter writer = new OutputStreamWriter(responseBody, "UTF-8");
+
+				writer.write(response);
+				writer.close();
+				responseBody.close();
+			}
+
+		}
+	}
+
+
+}
